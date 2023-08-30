@@ -5,6 +5,7 @@
 V1.0.0:
 
 1. 加入[MPV-Play-BiliBili-Comments](https://github.com/itKelis/MPV-Play-BiliBili-Comments)的支持，需要配合[Play-With-MPV](https://github.com/LuckyPuppy514/Play-With-MPV)使用
+2. 修复让弹幕60帧显示
 
 V0.4 beta:
 
