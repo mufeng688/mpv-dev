@@ -2,7 +2,11 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
-V0.3 beta；
+V0.4 beta:
+
+1. 加入[MPV-Play-BiliBili-Comments](https://github.com/itKelis/MPV-Play-BiliBili-Comments)的支持，需要配合[Play-With-MPV](https://github.com/LuckyPuppy514/Play-With-MPV)使用
+
+V0.3 beta:
 
 1. 并入[MPV_lazy](https://github.com/hooke007/MPV_lazy)中的vs滤镜包（包含补帧-MVTools_快速，补帧-MVTools_标准，补帧-RIFE_标准）
 2. 调整cache目录
