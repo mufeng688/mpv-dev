@@ -2,9 +2,13 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
-V0.4 beta:
+V1.0.0:
 
 1. 加入[MPV-Play-BiliBili-Comments](https://github.com/itKelis/MPV-Play-BiliBili-Comments)的支持，需要配合[Play-With-MPV](https://github.com/LuckyPuppy514/Play-With-MPV)使用
+
+V0.4 beta:
+
+1. bug修复
 
 V0.3 beta:
 
