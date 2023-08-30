@@ -9,11 +9,11 @@ V0.4 beta:
 V0.3 beta:
 
 1. 并入[MPV_lazy](https://github.com/hooke007/MPV_lazy)中的vs滤镜包（包含补帧-MVTools_快速，补帧-MVTools_标准，补帧-RIFE_标准）
-2. 调整cache目录
+2. 调整cache目录为_cache
 
 V0.2 beta：
 
-1. 修复manager.json部分无法更新的链接
+1. 修复manager.json部分无法更新的链接（连接到我的GitHub的fork项目），部分项目可能有做修改
 
 V0.1 beta：
 
