@@ -2,12 +2,9 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
-V1.0.1:
+V0.4.1 beta:
 
-*修改thumbfast.conf里的network为yes，在网络播放时启用略缩图
-
-V1.0.0:
-
+* 修改thumbfast.conf里的network为yes，在网络播放时启用略缩图
 * 加入[MPV-Play-BiliBili-Comments](https://github.com/itKelis/MPV-Play-BiliBili-Comments)的支持，需要配合[Play-With-MPV](https://github.com/LuckyPuppy514/Play-With-MPV)使用
 * 修复让弹幕60帧显示
 
