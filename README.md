@@ -2,6 +2,13 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
+V0.5.0 beta:
+
+* 同步mpv-config上的mpv.conf上的修改
+* 更新部分脚本文件为最新版本
+* 启用HDR直通参数配置组，部分设备可能出现颜色偏差
+* 关闭Target色彩管理配置组
+
 V0.4.1 beta:
 
 * 修改thumbfast.conf里的network为yes，在网络播放时启用略缩图
