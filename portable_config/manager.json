@@ -1,16 +1,5 @@
 [
-  {
-    "git":"https://github.com/CogentRedTester/mpv_manager",
-    "whitelist":"%.lua$",
-    "dest":"~~/scripts",
-    "branch":"local-repo-support"
-  },
-  {
-    "git":"https://github.com/occivink/mpv-scripts",
-    "whitelist":"blacklist%-extensions%.lua$",
-    "dest":"~~/scripts"
-  },
-  {
+    {
     "git":"https://github.com/detuur/mpv-scripts",
     "whitelist":"skiptosilence%.lua$",
     "dest":"~~/scripts"
@@ -190,16 +179,16 @@
     "dest":"~~/shaders/ACNet"
   },
   {
-    "git":"https://github.com/6r14N/glsl-joint-bilateral",
-    "whitelist":"jointbilateral%.glsl$",
-    "dest":"~~/shaders/other",
-    "branch":"dev"
-  },
-  {
-    "git":"https://github.com/6r14N/glsl-pixel-clipper",
+    "git":"https://github.com/Artoriuz/glsl-joint-bilateral",
     "whitelist":"%.glsl$",
     "dest":"~~/shaders/other",
-    "branch":"dev"
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/Artoriuz/glsl-pixel-clipper",
+    "whitelist":"%.glsl$",
+    "dest":"~~/shaders/other",
+    "branch":"main"
   },
   {
     "git":"https://github.com/bloc97/Anime4K",

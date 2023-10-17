@@ -19,9 +19,9 @@ audio=yes
 additional_image_exts=list,of,ext
 additional_video_exts=list,of,ext
 additional_audio_exts=list,of,ext
-dir_mode=<recursive|lazy|ignore>
 ignore_hidden=yes
 same_type=yes
+directory_mode=recursive
 
 --]]
 
@@ -40,9 +40,9 @@ o = {
     additional_image_exts = "",
     additional_video_exts = "",
     additional_audio_exts = "",
-    dir_mode = "ignore",
     ignore_hidden = true,
-    same_type = false
+    same_type = false,
+    directory_mode = "ignore"
 }
 options.read_options(o, nil, function(list)
     split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
@@ -50,6 +50,9 @@ options.read_options(o, nil, function(list)
         list.audio or list.additional_audio_exts or
         list.images or list.additional_image_exts then
         create_extensions()
+    end
+    if list.directory_mode then
+        validate_directory_mode()
     end
 end)
 
@@ -99,6 +102,13 @@ function create_extensions()
     if o.images then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_IMAGES), o.additional_image_exts) end
 end
 create_extensions()
+
+function validate_directory_mode()
+    if o.directory_mode ~= "recursive" and o.directory_mode ~= "lazy" and o.directory_mode ~= "ignore" then
+        o.directory_mode = nil
+    end
+end
+validate_directory_mode()
 
 function add_files(files)
     local oldcount = mp.get_property_number("playlist-count", 1)
@@ -156,7 +166,7 @@ local autoloaded = nil
 local added_entries = {}
 local autoloaded_dir = nil
 
-function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files)
+function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files, extensions)
     if dir_depth == MAXDIRSTACK then
         return
     end
@@ -174,7 +184,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         if ext == nil then
             return false
         end
-        return EXTENSIONS_TARGET[string.lower(ext)]
+        return extensions[string.lower(ext)]
     end)
     table.filter(dirs, function(d)
         return not ((o.ignore_hidden and string.match(d, "^%.")))
@@ -190,7 +200,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
     if dir_mode == "recursive" then
         for _, dir in ipairs(dirs) do
             scan_dir(prefix .. dir .. separator, current_file, dir_mode,
-                     separator, dir_depth + 1, total_files)
+                     separator, dir_depth + 1, total_files, extensions)
         end
     else
         for i, dir in ipairs(dirs) do
@@ -205,10 +215,10 @@ function find_and_add_entries()
     local dir, filename = utils.split_path(path)
     msg.trace(("dir: %s, filename: %s"):format(dir, filename))
     if o.disabled then
-        msg.verbose("stopping: autoload disabled")
+        msg.debug("stopping: autoload disabled")
         return
     elseif #dir == 0 then
-        msg.verbose("stopping: not a local path")
+        msg.debug("stopping: not a local path")
         return
     end
 
@@ -217,7 +227,7 @@ function find_and_add_entries()
     -- check if this is a manually made playlist
     if (pl_count > 1 and autoloaded == nil) or
        (pl_count == 1 and EXTENSIONS[string.lower(this_ext)] == nil) then
-        msg.verbose("stopping: manually made playlist")
+        msg.debug("stopping: manually made playlist")
         return
     else
         if pl_count == 1 then
@@ -227,16 +237,17 @@ function find_and_add_entries()
         end
     end
 
+    local extensions = {}
     if o.same_type then
         if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
-            EXTENSIONS_TARGET = EXTENSIONS_VIDEO
+            extensions = EXTENSIONS_VIDEO
         elseif EXTENSIONS_AUDIO[string.lower(this_ext)] ~= nil then
-            EXTENSIONS_TARGET = EXTENSIONS_AUDIO
+            extensions = EXTENSIONS_AUDIO
         else
-            EXTENSIONS_TARGET = EXTENSIONS_IMAGES
+            extensions = EXTENSIONS_IMAGES
         end
     else
-        EXTENSIONS_TARGET = EXTENSIONS
+        extensions = EXTENSIONS
     end
 
     local pl = mp.get_property_native("playlist", {})
@@ -246,13 +257,13 @@ function find_and_add_entries()
 
     local files = {}
     do
-        local dir_mode = o.dir_mode
-        local separator = package.config:sub(1, 1) == "\\" and "\\" or "/"
-        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files)
+        local dir_mode = o.directory_mode or mp.get_property("directory-mode", "lazy")
+        local separator = mp.get_property_native("platform") == "windows" and "\\" or "/"
+        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files, extensions)
     end
 
     if next(files) == nil then
-        msg.verbose("no other files or directories in directory")
+        msg.debug("no other files or directories in directory")
         return
     end
 
@@ -287,10 +298,10 @@ function find_and_add_entries()
             -- skip files that are/were already in the playlist
             if not added_entries[file] then
                 if direction == -1 then
-                    msg.info("Prepending " .. file)
+                    msg.verbose("Prepending " .. file)
                     table.insert(append[-1], 1, {file, pl_current + i * direction + 1})
                 else
-                    msg.info("Adding " .. file)
+                    msg.verbose("Adding " .. file)
                     if pl_count > 1 then
                         table.insert(append[1], {file, pl_current + i * direction - 1})
                     else

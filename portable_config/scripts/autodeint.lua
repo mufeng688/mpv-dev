@@ -149,6 +149,7 @@ function select_filter()
         mp.msg.info(string.format("interlaced with %s field dominance: setting deinterlace property", dominance))
         del_filter_if_present(pullup_label)
         mp.set_property("deinterlace","yes")
+        mp.osd_message("Appplying deinterlace.")
         stop_detect()
     end
 end

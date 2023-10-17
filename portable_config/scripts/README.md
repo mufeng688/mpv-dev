@@ -9,7 +9,7 @@
 | simple-mpv-webui（组）* | 为 mpv 实现一个简单的 webui（依赖 [luasocket](https://github.com/57op/simple-mpv-webui-windows-libs) ; 配置文件 [webui.conf](../script-opts/webui.conf)） |
 | uosc*（组） | 第三方高级 OSC 脚本，实现了许多实用功能（配置文件 [uosc.conf](../script-opts/uosc.conf)） |
 | autoload.lua* | 自动加载同级目录的文件（配置文件 [autoload.conf](../script-opts/autoload.conf)） |
-| autodeint.lua       | 自动检测并切换去交错（默认禁用，需快捷键启用） |
+| autodeint.lua      | 自动检测并切换去交错 |
 | auto-save-state.lua* | 每隔 1 分钟自动保存播放进度（而不是退出时），播放完毕时自动删除进度 |
 | blacklist-extensions.lua         | mpv 直接拖放目录时的文件加载类型的黑/白名单 |
 | change-refresh.lua   | 更改显示器刷新率（依赖 [nircmd](https://www.nirsoft.net/utils/nircmd.html) ，配置文件 [changerefresh.conf](../script-opts/changerefresh.conf)） |
@@ -31,7 +31,7 @@
 | manager.lua | 一键更新指定脚本和着色器（配置文件 [manager.json](../manager.json)） |
 | mpv_sort_script.lua* | 使用 mpv 直接加载目录时实现高级排序功能：名称、日期、大小和随机排序（配置文件 [mpv_sort_script.conf](../script-opts/mpv_sort_script.conf)） |
 | mpv-animated.lua* | 剪切指定片段为 webp/gif 动图（依赖 ffmpeg；配置文件 [mpv_animated.conf](../script-opts/mpv_animated.conf)） |
-| notify_media.lua* | 基于 IPC 管道实现 SMTC 功能（依赖 [MPVMediaControl.exe](https://github.com/datasone/MPVMediaControl/releases)；配置文件 [notify_media.conf](../script-opts/notify_media.conf)） [notify_media.lua](notify_media.lua) 已被移入archive文件夹|
+| notify_media.lua* | 基于 IPC 管道实现 SMTC 功能（依赖 [MPVMediaControl.exe](https://github.com/datasone/MPVMediaControl/releases)；配置文件 [notify_media.conf](../script-opts/notify_media.conf)） |
 | ordered-chapters-playlist.lua | 有序章节播放列表 |
 | persist_properties.lua | 监视并保存预设参数的全局变化值（如音量）（配置文件 [persist_properties.conf](../script-opts/persist_properties.conf)） |
 | playlistmanager.lua* | OSD 交互式播放列表（配置文件 [playlistmanager.conf](../script-opts/playlistmanager.conf)） |
@@ -56,7 +56,6 @@
 | youtube-download.lua* | 下载 ytdl 视频/音频/字幕/片段（依赖 yt-dlp/youtube-dl和ffmpeg; 配置文件 [youtube-download.conf](../script-opts/youtube-download.conf)） |
 
 1. 标记`*`号的部分脚本为**个人修改版或自建脚本**。
-2. 所有脚本预绑定的`mp.add_key_binding`静态键位已被 [mpv.conf](../mpv.conf) 中的`input-default-bindings=no`参数屏蔽，可查看 [input.conf](../input.conf)  的"LUA 脚本"部分示例参考绑定所需键位  
-   - 本配置绑定的快捷键及功能请参考 [快捷键说明.md](../快捷键说明.md) 文件
-3. 部分脚本存在动态绑定键位，可查看对应脚本及配置文件相关部分（或 [快捷键说明.md](../快捷键说明.md) 中相关说明）
-4. **MPV已知问题**：当 scripts 文件夹内脚本绑定的`mp.add_key_binding`总数超过一定阈值时，会导致 osc.lua 交互功能失效。本配置已针对该问题进行脚本优化
+2. 所有脚本预绑定的`mp.add_key_binding`静态键位已被 [mpv.conf](../mpv.conf) 中的`input-default-bindings=no`参数屏蔽
+3. 部分脚本存在动态绑定键位，可查看对应脚本及配置文件相关部分
+4. **MPV 已知问题**：当 scripts 文件夹内脚本绑定的`mp.add_key_binding`总数超过一定阈值时，会导致 osc.lua 交互功能失效。本配置已针对该问题进行脚本优化
