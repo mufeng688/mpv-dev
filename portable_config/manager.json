@@ -57,7 +57,7 @@
     "git":"https://github.com/6r14N/uosc",
     "whitelist":"scripts",
     "dest":"~~/scripts/uosc",
-    "branch":"dev"
+    "branch":"main"
   },
   {
     "git":"https://github.com/dyphire/autosubsync-mpv",
