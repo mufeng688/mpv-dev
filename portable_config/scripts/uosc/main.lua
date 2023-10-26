@@ -1,11 +1,4 @@
---[[
-SOURCE_ https://github.com/tomasklaen/uosc/tree/main/scripts/uosc
-COMMIT_ 6e19bee95591e3c7653ba1d887d09e7708544eac
-文档_ https://github.com/hooke007/MPV_lazy/discussions/186
-
-极简主义设计驱动的多功能界面脚本群组，兼容 thumbfast 新缩略图引擎
-]]
-
+--[[ uosc | https://github.com/tomasklaen/uosc ]]
 local uosc_version = '5.0.0'
 
 mp.commandv('script-message', 'uosc-version', uosc_version)
@@ -16,8 +9,8 @@ utils = require('mp.utils')
 msg = require('mp.msg')
 osd = mp.create_osd_overlay('ass-events')
 QUARTER_PI_SIN = math.sin(math.pi / 4)
+
 require('lib/std')
-require('lib/lang')
 
 --[[ OPTIONS ]]
 
@@ -28,64 +21,68 @@ defaults = {
 	progress = 'windowed',
 	progress_size = 2,
 	progress_line_width = 20,
+	timeline_persistency = '',
 	timeline_border = 1,
-	timeline_step = 1,
+	timeline_step = 5,
 	timeline_cache = true,
-	timeline_persistency = 'idle,audio',
 
 	controls =
-	'menu,ST-stats_tog,gap,play_pause,gap,subtitles,audio,<has_chapter>chapters,<has_many_edition>editions,<has_many_video>video,<stream>stream-quality,gap,space,speed,space,shuffle,loop-playlist,loop-file,gap,prev,items,next,gap,fullscreen',
+	'menu,gap,subtitles,<has_many_audio>audio,<has_many_video>video,<has_many_edition>editions,<stream>stream-quality,gap,space,speed,space,shuffle,loop-playlist,loop-file,gap,prev,items,next,gap,fullscreen',
 	controls_size = 32,
 	controls_margin = 8,
 	controls_spacing = 2,
-	controls_persistency = 'idle,audio',
+	controls_persistency = '',
 
 	volume = 'right',
 	volume_size = 40,
+	volume_persistency = '',
 	volume_border = 1,
 	volume_step = 1,
-	volume_persistency = 'idle,audio',
 
+	speed_persistency = '',
 	speed_step = 0.1,
 	speed_step_is_factor = false,
-	speed_persistency = 'idle,audio',
 
 	menu_item_height = 36,
 	menu_min_width = 260,
+	menu_padding = 4,
 	menu_type_to_search = true,
 
 	top_bar = 'no-border',
 	top_bar_size = 40,
+	top_bar_persistency = '',
 	top_bar_controls = true,
 	top_bar_title = 'yes',
 	top_bar_alt_title = '',
 	top_bar_alt_title_place = 'below',
 	top_bar_flash_on = 'video,audio',
-	top_bar_persistency = 'idle,audio',
 
-	window_border_size = 2,
+	window_border_size = 1,
 
 	autoload = false,
-	autoload_types = 'video',
+	autoload_types = 'video,audio,image',
 	shuffle = false,
 
-	scale = 0,                                -- UI缩放倍率
-	scale_fullscreen = 0,                     -- UI缩放倍率
+	scale = 1,
+	scale_fullscreen = 1.3,
+	font = '',
 	font_scale = 1,
-	font_bold = false,
 	text_border = 1.2,
-	border_radius = 2,
+	border_radius = 4,
 	color = '',
 	opacity = '',
 	animation_duration = 100,
 	text_width_estimation = true,
+	pause_on_click_shorter_than = 0, -- deprecated by below
 	click_threshold = 0,
 	click_command = 'cycle pause; script-binding uosc/flash-pause-indicator',
 	flash_duration = 1000,
 	proximity_in = 40,
 	proximity_out = 120,
-	destination_time = 'total',
+	total_time = false, -- deprecated by below
+	destination_time = 'playtime-remaining',
 	time_precision = 0,
+	font_bold = false,
 	autohide = false,
 	buffered_time_threshold = 60,
 	pause_indicator = 'flash',
@@ -93,25 +90,20 @@ defaults = {
 	video_types =
 	'3g2,3gp,asf,avi,f4v,flv,h264,h265,m2ts,m4v,mkv,mov,mp4,mp4v,mpeg,mpg,ogm,ogv,rm,rmvb,ts,vob,webm,wmv,y4m',
 	audio_types =
-	'aac,ac3,aiff,ape,au,dsf,dts,flac,m4a,mid,midi,mka,mp3,mp4a,oga,ogg,opus,spx,tak,tta,wav,weba,wma,wv',
-	image_types =
-	'apng,avif,bmp,gif,j2k,jp2,jfif,jpeg,jpg,jxl,mj2,png,svg,tga,tif,tiff,webp',
+	'aac,ac3,aiff,ape,au,cue,dsf,dts,flac,m4a,mid,midi,mka,mp3,mp4a,oga,ogg,opus,spx,tak,tta,wav,weba,wma,wv',
+	image_types = 'apng,avif,bmp,gif,j2k,jp2,jfif,jpeg,jpg,jxl,mj2,png,svg,tga,tif,tiff,webp',
 	subtitle_types = 'aqt,ass,gsub,idx,jss,lrc,mks,pgs,pjs,psb,rt,sbv,slt,smi,sub,sup,srt,ssa,ssf,ttxt,txt,usf,vt,vtt',
 	default_directory = '~/',
 	show_hidden_files = false,
 	use_trash = false,
-	adjust_osd_margins = false,
+	adjust_osd_margins = true,
 	chapter_ranges = 'openings:30abf964,endings:30abf964,ads:c54e4e80',
 	chapter_range_patterns = 'openings:オープニング;endings:エンディング',
+	languages = 'slang,en',
 	disable_elements = '',
-
-	idlescreen = true,
-	idlemsg = 'default',
-	idle_call_menu = 0,                       -- 空闲自动弹出上下文菜单
-	custom_font = 'default',                  -- 自定义界面字体
 }
 options = table_copy(defaults)
-opt.read_options(options, nil, function(_)
+opt.read_options(options, 'uosc', function(_)
 	update_config()
 	update_human_times()
 	Manager:disable('user', options.disable_elements)
@@ -122,30 +114,25 @@ end)
 -- Normalize values
 options.proximity_out = math.max(options.proximity_out, options.proximity_in + 1)
 if options.chapter_ranges:sub(1, 4) == '^op|' then options.chapter_ranges = defaults.chapter_ranges end
+if options.pause_on_click_shorter_than > 0 and options.click_threshold == 0 then
+	msg.warn('`pause_on_click_shorter_than` is deprecated. Use `click_threshold` and `click_command` instead.')
+	options.click_threshold = options.pause_on_click_shorter_than
+end
+if options.total_time and options.destination_time == 'playtime-remaining' then
+	msg.warn('`total_time` is deprecated. Use `destination_time` instead.')
+	options.destination_time = 'total'
+elseif not itable_index_of({'total', 'playtime-remaining', 'time-remaining'}, options.destination_time) then
+	options.destination_time = 'playtime-remaining'
+end
 -- Ensure required environment configuration
 if options.autoload then mp.commandv('set', 'keep-open-pause', 'no') end
--- 禁用DPI探测时的UI倍率自动计算
-function auto_ui_scale()
-	local display_w, display_h = mp.get_property_number('display-width', 0), mp.get_property_number('display-height', 0)
-	local display_aspect = display_w / display_h or 0
-	if display_aspect <= 1 then
-		options.scale = 1
-		msg.warn('检测到异常的显示器分辨率，回退选项 scale 为1')
-		return
-	end
-	if display_aspect >=2 then
-		options.scale = tonumber(string.format('%.2f', display_h / 1080))
-		msg.info('检测到超宽显示器，建议手动指定选项 scale')
-		return
-	end
-	if display_w * display_h > 2304000 then
-		options.scale = tonumber(string.format('%.2f', math.sqrt(display_w * display_h / 2073600)))
-	else
-		options.scale = 1
-	end
-end
--- 设置脚本属性
-mp.set_property_native('user-data/osc', { idlescreen = options.idlescreen })
+
+--[[ INTERNATIONALIZATION ]]
+local intl = require('lib/intl')
+t = intl.t
+
+--[[ CHARACTER CONVERSION ]]
+local char_conv = require('lib/char_conv')
 
 --[[ CONFIG ]]
 local config_defaults = {
@@ -154,7 +141,7 @@ local config_defaults = {
 		foreground_text = serialize_rgba('000000').color,
 		background = serialize_rgba('000000').color,
 		background_text = serialize_rgba('ffffff').color,
-		curtain = serialize_rgba('000000').color,
+		curtain = serialize_rgba('111111').color,
 		success = serialize_rgba('a5e075').color,
 		error = serialize_rgba('ff616e').color,
 	},
@@ -165,13 +152,13 @@ local config_defaults = {
 		slider = 0.9,
 		slider_gauge = 1,
 		speed = 0.6,
-		menu = 0.9,
-		submenu = 0.6,
+		menu = 1,
+		submenu = 0.4,
 		border = 1,
 		title = 1,
 		tooltip = 1,
 		thumbnail = 1,
-		curtain = 0.5,
+		curtain = 0.8,
 		idle_indicator = 0.8,
 		audio_indicator = 0.5,
 		buffering_indicator = 0.3,
@@ -182,15 +169,7 @@ config = {
 	-- sets max rendering frequency in case the
 	-- native rendering frequency could not be detected
 	render_delay = 1 / 60,
-	font = (function()
-			local font_osd = mp.get_property_native('options/osd-font')
-			local font_u = options.custom_font
-			if font_u ~= 'default' then
-				return font_u
-			else
-				return font_osd
-			end
-	end)(),
+	font = options.font ~= '' and options.font or mp.get_property('options/osd-font'),
 	osd_margin_x = mp.get_property('osd-margin-x'),
 	osd_margin_y = mp.get_property('osd-margin-y'),
 	osd_alignment_x = mp.get_property('osd-align-x'),
@@ -276,43 +255,57 @@ function update_config()
 end
 update_config()
 
--- 上下文菜单的默认内容
+-- Default menu items
 function create_default_menu_items()
 	return {
-		{title = lang._cm_load, items = {
-			{title = lang._cm_file_browser, value = 'script-binding uosc/open-file'},
-			{title = lang._cm_import_sid, value = 'script-binding uosc/load-subtitles'},
-		},},
-		{title = lang._cm_navigation, items = {
-			{title = lang._cm_playlist, value = 'script-binding uosc/playlist'},
-			{title = lang._cm_edition_list, value = 'script-binding uosc/editions'},
-			{title = lang._cm_chapter_list, value = 'script-binding uosc/chapters'},
-			{title = lang._cm_vid_list, value = 'script-binding uosc/video'},
-			{title = lang._cm_aid_list, value = 'script-binding uosc/audio'},
-			{title = lang._cm_sid_list, value = 'script-binding uosc/subtitles'},
-			{title = lang._cm_playlist_shuffle, value = 'playlist-shuffle'},
-		},},
-		{title = lang._cm_ushot, value = 'script-binding uosc/shot'},
-		{title = lang._cm_video, items = {
-			{title = lang._cm_decoding_api, value = 'cycle-values hwdec no auto auto-copy'},
-			{title = lang._cm_deband_toggle, value = 'cycle deband'},
-			{title = lang._cm_deint_toggle, value = 'cycle deinterlace'},
-			{title = lang._cm_icc_toggle, value = 'cycle icc-profile-auto'},
-			{title = lang._cm_corpts_toggle, value = 'cycle correct-pts'},
-		},},
-		{title = lang._cm_tools, items = {
-			{title = lang._cm_keybinding, value = 'script-binding uosc/keybinds'},
-			{title = lang._cm_stats_toggle, value = 'script-binding display-stats-toggle'},
-			{title = lang._cm_console_on, value = 'script-binding console/enable'},
-			{title = lang._cm_border_toggle, value = 'cycle border'},
-			{title = lang._cm_ontop_toggle, value = 'cycle ontop'},
-			{title = lang._cm_audio_device, value = 'script-binding uosc/audio-device'},
-			{title = lang._cm_stream_quality, value = 'script-binding uosc/stream-quality'},
-			{title = lang._cm_show_file_dir, value = 'script-binding uosc/show-in-directory'},
-			{title = lang._cm_show_config_dir, value = 'script-binding uosc/open-config-directory'},
-		},},
-		{title = lang._cm_stop, value = 'stop'},
-		{title = lang._cm_quit, value = 'quit'},
+		{title = t('Subtitles'), value = 'script-binding uosc/subtitles'},
+		{title = t('Audio tracks'), value = 'script-binding uosc/audio'},
+		{title = t('Stream quality'), value = 'script-binding uosc/stream-quality'},
+		{title = t('Playlist'), value = 'script-binding uosc/items'},
+		{title = t('Chapters'), value = 'script-binding uosc/chapters'},
+		{
+			title = t('Navigation'),
+			items = {
+				{
+					title = t('Next'),
+					hint = t('playlist or file'),
+					value =
+					'script-binding uosc/next',
+				},
+				{
+					title = t('Prev'),
+					hint = t('playlist or file'),
+					value =
+					'script-binding uosc/prev',
+				},
+				{title = t('Delete file & Next'), value = 'script-binding uosc/delete-file-next'},
+				{title = t('Delete file & Prev'), value = 'script-binding uosc/delete-file-prev'},
+				{title = t('Delete file & Quit'), value = 'script-binding uosc/delete-file-quit'},
+				{title = t('Open file'), value = 'script-binding uosc/open-file'},
+			},
+		},
+		{
+			title = t('Utils'),
+			items = {
+				{
+					title = t('Aspect ratio'),
+					items = {
+						{title = t('Default'), value = 'set video-aspect-override "-1"'},
+						{title = '16:9', value = 'set video-aspect-override "16:9"'},
+						{title = '4:3', value = 'set video-aspect-override "4:3"'},
+						{title = '2.35:1', value = 'set video-aspect-override "2.35:1"'},
+					},
+				},
+				{title = t('Audio devices'), value = 'script-binding uosc/audio-device'},
+				{title = t('Editions'), value = 'script-binding uosc/editions'},
+				{title = t('Screenshot'), value = 'async screenshot'},
+				{title = t('Key bindings'), value = 'script-binding uosc/keybinds'},
+				{title = t('Show in directory'), value = 'script-binding uosc/show-in-directory'},
+				{title = t('Open config folder'), value = 'script-binding uosc/open-config-directory'},
+				{title = t('Update uosc'), value = 'script-binding uosc/update'},
+			},
+		},
+		{title = t('Quit'), value = 'quit'},
 	}
 end
 
@@ -387,8 +380,6 @@ state = {
 	hidpi_scale = 1,
 	scale = 1,
 	radius = 0,
-	idlescreen = options.idlescreen,
-	idlemsg = options.idlemsg,
 }
 thumbnail = {width = 0, height = 0, disabled = false}
 external = {} -- Properties set by external scripts
@@ -405,21 +396,10 @@ require('lib/menus')
 --[[ STATE UPDATERS ]]
 
 function update_display_dimensions()
-	local real_width, real_height = mp.get_osd_size()
-	if real_width <= 0 then return end
-
-	-- 此处起才能获取到显示分辨率的信息
-	if options.scale <= 0 then
-		if mp.get_property_native('hidpi-window-scale') then
-			options.scale = 1
-		else
-			auto_ui_scale()
-		end
-	end
-	if options.scale_fullscreen <= 0 then options.scale_fullscreen = options.scale end
-
 	state.scale = (state.hidpi_scale or 1) * (state.fullormaxed and options.scale_fullscreen or options.scale)
 	state.radius = round(options.border_radius * state.scale)
+	local real_width, real_height = mp.get_osd_size()
+	if real_width <= 0 then return end
 	display.width, display.height = real_width, real_height
 	display.initialized = true
 
@@ -853,25 +833,25 @@ bind_command('keybinds', function()
 	end
 end)
 bind_command('load-subtitles', create_track_loader_menu_opener({
-	name = 'subtitles', hint = lang._sid_menu, prop = 'sub', allowed_types = itable_join(config.types.video, config.types.subtitle),
+	name = 'subtitles', prop = 'sub', allowed_types = itable_join(config.types.video, config.types.subtitle),
 }))
 bind_command('load-audio', create_track_loader_menu_opener({
-	name = 'audio', hint = lang._aid_menu, prop = 'audio', allowed_types = itable_join(config.types.video, config.types.audio),
+	name = 'audio', prop = 'audio', allowed_types = itable_join(config.types.video, config.types.audio),
 }))
 bind_command('load-video', create_track_loader_menu_opener({
-	name = 'video', hint = lang._vid_menu, prop = 'video', allowed_types = config.types.video,
+	name = 'video', prop = 'video', allowed_types = config.types.video,
 }))
 bind_command('subtitles', create_select_tracklist_type_menu_opener(
-	lang._sid_submenu_title, 'sub', 'sid', 'script-binding uosc/load-subtitles'
+	t('Subtitles'), 'sub', 'sid', 'script-binding uosc/load-subtitles'
 ))
 bind_command('audio', create_select_tracklist_type_menu_opener(
-	lang._aid_submenu_title, 'audio', 'aid', 'script-binding uosc/load-audio'
+	t('Audio'), 'audio', 'aid', 'script-binding uosc/load-audio'
 ))
 bind_command('video', create_select_tracklist_type_menu_opener(
-	lang._vid_submenu_title, 'video', 'vid', 'script-binding uosc/load-video'
+	t('Video'), 'video', 'vid', 'script-binding uosc/load-video'
 ))
 bind_command('playlist', create_self_updating_menu_opener({
-	title = lang._playlist_submenu_title,
+	title = t('Playlist'),
 	type = 'playlist',
 	list_prop = 'playlist',
 	serializer = function(playlist)
@@ -880,7 +860,9 @@ bind_command('playlist', create_self_updating_menu_opener({
 			local is_url = is_protocol(item.filename)
 			local item_title = type(item.title) == 'string' and #item.title > 0 and item.title or false
 			items[index] = {
-				title = item_title or (is_url and item.filename or serialize_path(item.filename).basename),
+				title = (is_url and #playlist == 1 and mp.get_property('media-title')) or
+				        (is_url and item_title and item_title) or (is_url and url_decode(item.filename)) or
+					    serialize_path(item.filename).basename,
 				hint = tostring(index),
 				active = item.current,
 				value = index,
@@ -895,7 +877,7 @@ bind_command('playlist', create_self_updating_menu_opener({
 	on_delete_item = function(index) mp.commandv('playlist-remove', tostring(index - 1)) end,
 }))
 bind_command('chapters', create_self_updating_menu_opener({
-	title = lang._chapter_list_submenu_title,
+	title = t('Chapters'),
 	type = 'chapters',
 	list_prop = 'chapter-list',
 	active_prop = 'chapter',
@@ -915,16 +897,17 @@ bind_command('chapters', create_self_updating_menu_opener({
 	on_select = function(index) mp.commandv('set', 'chapter', tostring(index - 1)) end,
 }))
 bind_command('editions', create_self_updating_menu_opener({
-	title = lang._edition_list_submenu_title,
+	title = t('Editions'),
 	type = 'editions',
 	list_prop = 'edition-list',
 	active_prop = 'current-edition',
 	serializer = function(editions, current_id)
 		local items = {}
 		for _, edition in ipairs(editions or {}) do
+			local edition_id_1 = tostring(edition.id + 1)
 			items[#items + 1] = {
-				title = edition.title or lang._edition_list_submenu_item_title,
-				hint = tostring(edition.id + 1),
+				title = edition.title or t('Edition %s', edition_id_1),
+				hint = edition_id_1,
 				value = edition.id,
 				active = edition.id == current_id,
 			}
@@ -988,7 +971,7 @@ bind_command('delete-file-quit', function()
 	mp.command('quit')
 end)
 bind_command('audio-device', create_self_updating_menu_opener({
-	title = lang._audio_device_submenu_title,
+	title = t('Audio devices'),
 	type = 'audio-device-list',
 	list_prop = 'audio-device-list',
 	active_prop = 'audio-device',
@@ -998,14 +981,12 @@ bind_command('audio-device', create_self_updating_menu_opener({
 		local items = {}
 		for _, device in ipairs(audio_device_list) do
 			if device.name == 'auto' or string.match(device.name, '^' .. ao) then
-				local title = device.description
-				if title == 'Autoselect device' then
-					title = lang._audio_device_submenu_item_title
-				end
 				local hint = string.match(device.name, ao .. '/(.+)')
 				if not hint then hint = device.name end
 				items[#items + 1] = {
-					title = title,
+					title = device.description:sub(1, 7) == 'Default'
+						and t('Default %s', device.description:sub(9))
+						or device.description,
 					hint = hint,
 					active = device.name == current_device,
 					value = device.name,
@@ -1039,37 +1020,6 @@ end)
 bind_command('update', function()
 	if not Elements:has('updater') then require('elements/Updater'):new() end
 end)
-
--- 菜单专用截屏
-mp.add_key_binding(nil, 'shot', function()
-	if Menu:is_open() then
-		local paused = mp.get_property_bool('pause')
-		local timeout = options.animation_duration/1000 + 0.2
-		if paused then
-			mp.add_timeout(timeout, function() -- 延迟过低可能产生闪烁
-				mp.command('screenshot window')
-			end)
-		else
-			options.pause_indicator = 'manual'
-			mp.set_property_bool('pause', true)
-			mp.add_timeout(timeout, function()
-				mp.command('screenshot window')
-				mp.set_property_bool('pause', false)
-			end)
-		end
-	else
-		mp.command('screenshot window')
-	end
-end)
-
--- 空闲自动弹出上下文菜单
-if type(options.idle_call_menu) == 'number' then
-	if options.idle_call_menu <= 2 and options.idle_call_menu > config.render_delay then
-		mp.observe_property('idle-active', 'bool', function(_, value)
-			if value == true then mp.add_timeout(options.idle_call_menu, function() if Menu:is_open() then return else mp.command('script-binding uosc/menu-blurred') end end) end
-		end)
-	end
-end
 
 --[[ MESSAGE HANDLERS ]]
 
@@ -1120,24 +1070,9 @@ end)
 mp.register_script_message('flash-elements', function(elements) Elements:flash(comma_split(elements)) end)
 mp.register_script_message('overwrite-binding', function(name, command) key_binding_overwrites[name] = command end)
 mp.register_script_message('disable-elements', function(id, elements) Manager:disable(id, elements) end)
-if options.idlescreen then
-	mp.register_script_message('osc-idlescreen', function(mode, no_osd)
-		if mode == 'cycle' then mode = state.idlescreen and 'no' or 'yes' end
-		set_state('idlescreen', mode == 'yes')
-		utils.shared_script_property_set('osc-idlescreen', mode)
-		mp.set_property_native('user-data/osc', { idlescreen = state.idlescreen })
-
-		if not no_osd and mp.get_property_number('osd-level', 1) >= 1 then
-			mp.osd_message('LOGO的可见性：' .. tostring(mode))
-		end
-	end)
-end
 
 --[[ ELEMENTS ]]
 
-if options.idlescreen then
-	require('elements/Logo'):new()
-end
 -- Dynamic elements
 local constructors = {
 	window_border = require('elements/WindowBorder'),

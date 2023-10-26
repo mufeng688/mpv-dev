@@ -3,6 +3,7 @@ local options = require("mp.options")
 
 local o = {
     path = "~~/recent.json",
+    title = 'Recently played',
     length = 10,
     width = 88,
     ignore_same_series = true,
@@ -13,14 +14,11 @@ local path = mp.command_native({ "expand-path", o.path })
 
 local menu = {
     type = 'recent_menu',
-    title = 'Recently played',
+    title = o.title,
     items = {},
 }
 
 local current_item = { nil, nil, nil }
-
-local locale = {}
-function t(text) return locale[text] or text end
 
 function utf8_char_bytes(str, i)
     local char_byte = str:byte(i)
@@ -121,7 +119,7 @@ function remove_deleted()
     for _, item in ipairs(menu.items) do
         local path = item.value[2]
         local deleted = false
-
+        
         if not is_protocol(path) then
             local meta, meta_error = utils.file_info(path)
             if not (meta and meta.is_file) then
@@ -211,6 +209,7 @@ end
 function on_load()
     local path = mp.get_property("path")
     if not path then return end
+    if not is_protocol(path) then path = path:gsub("\\", "/") end
     local filename = mp.get_property("filename")
     local filename_without_ext = get_filename_without_ext(filename)
     local title = mp.get_property("media-title") or path
@@ -234,9 +233,3 @@ mp.add_key_binding(nil, "open", open_menu)
 mp.add_key_binding(nil, "last", play_last)
 mp.register_event("file-loaded", on_load)
 mp.register_event("end-file", on_end)
-
-mp.commandv('script-message-to', 'uosc', 'get-locale', mp.get_script_name())
-mp.register_script_message('uosc-locale', function(json)
-    locale = utils.parse_json(json)
-    menu.title = t(menu.title)
-end)

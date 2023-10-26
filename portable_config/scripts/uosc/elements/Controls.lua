@@ -30,42 +30,26 @@ end
 function Controls:init_options()
 	-- Serialize control elements
 	local shorthands = {
-		menu               = 'command:menu:script-binding uosc/menu-blurred?' .. lang._button01,
-		subtitles          = 'command:subtitles:script-binding uosc/subtitles#sub>0?' .. lang._button02,
-		audio              = 'command:graphic_eq:script-binding uosc/audio#audio>1?' .. lang._button03,
-		['audio-device']   = 'command:speaker:script-binding uosc/audio-device?' .. lang._button04,
-		video              = 'command:theaters:script-binding uosc/video#video>1?' .. lang._button05,
-		playlist           = 'command:list_alt:script-binding uosc/playlist?' .. lang._button06,
-		chapters           = 'command:bookmark:script-binding uosc/chapters#chapters>0?' .. lang._button07,
-		editions           = 'command:bookmarks:script-binding uosc/editions#editions>1?' .. lang._button08,
-		['stream-quality'] = 'command:high_quality:script-binding uosc/stream-quality?' .. lang._button09,
-		['open-file']      = 'command:file_open:script-binding uosc/open-file?' .. lang._button10,
-		items              = 'command:list_alt:script-binding uosc/items?' .. lang._button11,
-		prev               = 'command:arrow_back_ios:script-binding uosc/prev?' .. lang._button12,
-		['next']           = 'command:arrow_forward_ios:script-binding uosc/next?' .. lang._button13,
-		first              = 'command:first_page:script-binding uosc/first?' .. lang._button14,
-		last               = 'command:last_page:script-binding uosc/last?' .. lang._button15,
-		['loop-playlist']  = 'cycle:repeat:loop-playlist:no/inf!?' .. lang._button16,
-		['loop-file']      = 'cycle:repeat_one:loop-file:no/inf!?' .. lang._button17,
-		shuffle            = 'toggle:shuffle:shuffle?' .. lang._button18,
-		fullscreen         = 'cycle:crop_free:fullscreen:no/yes=fullscreen_exit!?' .. lang._button19,
-
-		-- 自定义的捷径
-		['play_pause']     = 'cycle:not_started:pause:no=play_circle/yes=pause_circle?' .. lang._button_ext01,
-		['pause_play']     = 'cycle:not_started:pause:no=pause_circle/yes=play_circle?' .. lang._button_ext02,
-		['pl-prev']        = 'command:navigate_before:playlist-prev?' .. lang._button_ext03,
-		['pl-next']        = 'command:navigate_next:playlist-next?' .. lang._button_ext04,
-		border             = 'toggle:border_style:border?' .. lang._button_ext05,
-		ontop              = 'cycle:move_up:ontop:no/yes!?' .. lang._button_ext06,
-		hwdec              = 'cycle:developer_board_off:hwdec:no=developer_board_off/yes=memory/auto-copy=developer_board?' .. lang._button_ext07,
-		unscaled           = 'cycle:fit_screen:video-unscaled:no/yes!?' .. lang._button_ext08,
-		deband             = 'cycle:texture:deband:no/yes!?' .. lang._button_ext09,
-		deint              = 'cycle:clear_all:deinterlace:no/yes!?' .. lang._button_ext10,
-		['shot-vid']       = 'command:screenshot:screenshot video?' .. lang._button_ext11,
-
-		['ST-stats_tog']   = 'command:info_outline:script-binding display-stats-toggle?' .. lang._button_ext12,
-		['ST-thumb_tog']   = 'command:panorama:script-binding thumb_toggle?' .. lang._button_ext13,
-
+		['play-pause'] = 'cycle:pause:pause:no/yes=play_arrow?' .. t('Play/Pause'),
+		menu = 'command:menu:script-binding uosc/menu-blurred?' .. t('Menu'),
+		subtitles = 'command:closed_caption:script-binding uosc/subtitles#sub>1?' .. t('Subtitles'),
+		audio = 'command:graphic_eq:script-binding uosc/audio#audio>1?' .. t('Audio'),
+		['audio-device'] = 'command:speaker:script-binding uosc/audio-device?' .. t('Audio device'),
+		video = 'command:smart_display:script-binding uosc/video#video>1?' .. t('Video'),
+		playlist = 'command:list_alt:script-binding uosc/playlist#playlist>1?' .. t('Playlist'),
+		chapters = 'command:track_changes:script-binding uosc/chapters#chapters>1?' .. t('Chapters'),
+		['editions'] = 'command:movie_filter:script-binding uosc/editions#editions>1?' .. t('Editions'),
+		['stream-quality'] = 'command:high_quality:script-binding uosc/stream-quality?' .. t('Stream quality'),
+		['open-file'] = 'command:folder:script-binding uosc/open-file?' .. t('Open file'),
+		['items'] = 'command:list_alt:script-binding uosc/items#playlist>1?' .. t('Playlist/Files'),
+		prev = 'command:arrow_back_ios:script-binding uosc/prev?' .. t('Previous'),
+		next = 'command:arrow_forward_ios:script-binding uosc/next?' .. t('Next'),
+		first = 'command:first_page:script-binding uosc/first?' .. t('First'),
+		last = 'command:last_page:script-binding uosc/last?' .. t('Last'),
+		['loop-playlist'] = 'cycle:repeat:loop-playlist:no/inf!?' .. t('Loop playlist'),
+		['loop-file'] = 'cycle:repeat_one:loop-file:no/inf!?' .. t('Loop file'),
+		shuffle = 'toggle:shuffle:shuffle?' .. t('Shuffle'),
+		fullscreen = 'cycle:crop_free:fullscreen:no/yes=fullscreen_exit!?' .. t('Fullscreen'),
 	}
 
 	-- Parse out disposition/config pairs
@@ -228,6 +212,9 @@ function Controls:register_badge_updater(badge, element)
 			for _, track in ipairs(value) do if track.type == prop then count = count + 1 end end
 			return count
 		end
+	elseif prop == 'playlist' then
+		observable_name = 'playlist-count'
+		serializer = function(count) return count end
 	else
 		local parts = split(prop, '@')
 		-- Support both new `prop@owner` and old `@prop` syntaxes

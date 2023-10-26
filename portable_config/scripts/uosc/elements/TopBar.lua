@@ -37,6 +37,11 @@ function TopBarButton:render()
 		opacity = visibility, border = options.text_border * state.scale,
 	})
 
+	if self.id == 'tb_max' then
+		self.icon = state.fullscreen and 'close_fullscreen' or (state.maximized and 'filter_none' or 'crop_square')
+		self.command = state.fullscreen and 'set fullscreen no' or 'cycle window-maximized'
+	end
+
 	return ass
 end
 
@@ -53,12 +58,6 @@ function TopBar:init()
 	self.show_alt_title = false
 	self.main_title, self.alt_title = nil, nil
 
-	local function get_maximized_command()
-		return state.border
-			and (state.fullscreen and 'set fullscreen no;cycle window-maximized' or 'cycle window-maximized')
-			or 'set window-maximized no;cycle fullscreen'
-	end
-
 	-- Order aligns from right to left
 	self.buttons = {
 		TopBarButton:new('tb_close', {
@@ -67,7 +66,7 @@ function TopBar:init()
 		TopBarButton:new('tb_max', {
 			icon = 'crop_square',
 			background = '222222',
-			command = get_maximized_command,
+			command = 'cycle window-maximized',
 			render_order = self.render_order,
 		}),
 		TopBarButton:new('tb_min', {
@@ -80,7 +79,6 @@ function TopBar:init()
 
 	self:decide_titles()
 end
-
 
 function TopBar:destroy()
 	for _, button in ipairs(self.buttons) do button:destroy() end
@@ -104,7 +102,7 @@ function TopBar:decide_titles()
 	self.main_title = state.title ~= '' and state.title or nil
 
 	if (self.main_title == 'No file') then
-		self.main_title = lang._border_title
+		self.main_title = t('No file')
 	end
 
 	-- Fall back to alt title if main is empty

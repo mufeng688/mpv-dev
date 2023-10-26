@@ -17,6 +17,25 @@ function serialize_rgba(rgba)
 	}
 end
 
+-- Escape special characters in url.
+---@param str string
+---@return string
+function url_decode(str)
+	local function hex_to_char(x)
+		return string.char(tonumber(x, 16))
+	end
+	if str ~= nil then
+		str = str:gsub('^file://', '')
+		str = str:gsub('%%(%x%x)', hex_to_char)
+		if str:find('://localhost:?') then
+			str = str:gsub('^.*/', '')
+		end
+		return str
+	else
+		return
+	end
+end
+
 -- Trim any `char` from the end of the string.
 ---@param str string
 ---@param char string

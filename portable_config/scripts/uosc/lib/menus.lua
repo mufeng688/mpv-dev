@@ -86,12 +86,49 @@ function create_self_updating_menu_opener(options)
 end
 
 function create_select_tracklist_type_menu_opener(menu_title, track_type, track_prop, load_command)
+	----- string
+	local function is_empty(input)
+		if input == nil or input == "" then
+			return true
+		end
+	end
+
+	local function replace(str, what, with)
+		if is_empty(str) then return "" end
+		if is_empty(what) then return str end
+		if with == nil then with = "" end
+		what = string.gsub(what, "[%(%)%.%+%-%*%?%[%]%^%$%%]", "%%%1")
+		with = string.gsub(with, "[%%]", "%%%%")
+		return string.gsub(str, what, with)
+	end
+
+	local function esc_for_title(str)
+		str = str:gsub('^[_%.%-%s]*', '')
+				:gsub('%.([^%.]+)$', '')
+		return str
+	end
+
+	local function esc_for_codec(str)
+		if str:find("MPEG2") then str = "MPEG2"
+		elseif str:find("DVVIDEO") then str = "DV"
+		elseif str:find("PCM") then str = "PCM"
+		elseif str:find("PGS") then str = "PGS"
+    	elseif str:find("SUBRIP") then str = "SRT"
+    	elseif str:find("VTT") then str = "VTT"
+    	elseif str:find("DVD_SUB") then str = "VOB_SUB"
+    	elseif str:find("DVB_SUB") then str = "DVB_SUB"
+    	elseif str:find("DVB_TELE") then str = "TELETEXT"
+    	elseif str:find("ARIB") then str = "ARIB"
+    	end
+		return str
+	end
+
 	local function serialize_tracklist(tracklist)
 		local items = {}
 
 		if load_command then
 			items[#items + 1] = {
-				title = lang._submenu_import, bold = true, italic = true, hint = lang._submenu_load_file, value = '{load}', separator = true,
+				title = t('Load'), bold = true, italic = true, hint = t('open file'), value = '{load}', separator = true,
 			}
 		end
 
@@ -99,13 +136,9 @@ function create_select_tracklist_type_menu_opener(menu_title, track_type, track_
 		local active_index = nil
 		local disabled_item = nil
 
-		-- Add option to disable a subtitle track. This works for all tracks,
-		-- but why would anyone want to disable audio or video? Better to not
-		-- let people mistakenly select what is unwanted 99.999% of the time.
-		-- If I'm mistaken and there is an active need for this, feel free to
-		-- open an issue.
-		if track_type == 'sub' or track_type == 'audio' or track_type == 'video' then
-			disabled_item = {title = lang._submenu_id_disabled, italic = true, muted = true, hint = '—', value = nil, active = true}
+		-- Add option to disable track. This works for all tracks.
+		if track_type ~= '' then
+			disabled_item = {title = t('Disabled'), italic = true, muted = true, hint = '—', value = nil, active = true}
 			items[#items + 1] = disabled_item
 		end
 
@@ -119,15 +152,23 @@ function create_select_tracklist_type_menu_opener(menu_title, track_type, track_
 					h(track['demux-w'] and (track['demux-w'] .. 'x' .. track['demux-h']) or (track['demux-h'] .. 'p'))
 				end
 				if track['demux-fps'] then h(string.format('%.5gfps', track['demux-fps'])) end
-				h(track.codec)
-				if track['audio-channels'] then h(track['audio-channels'] .. lang._submenu_id_hint) end
+				h(esc_for_codec(track.codec:upper()))
+				if track['audio-channels'] then
+					h(track['audio-channels'] == 1
+						and t('%s channel', track['audio-channels'])
+						or t('%s channels', track['audio-channels']))
+				end
 				if track['demux-samplerate'] then h(string.format('%.3gkHz', track['demux-samplerate'] / 1000)) end
-				if track.forced then h(lang._submenu_id_forced) end
-				if track.default then h(lang._submenu_id_default) end
-				if track.external then h(lang._submenu_id_external) end
+				if track.forced then h(t('forced')) end
+				if track.default then h(t('default')) end
+				if track.external then h(t('external')) end
+
+				local filename = mp.get_property_native('filename/no-ext')
+				if track.title then track.title = replace(track.title, filename, '') end
+				if track.external then track.title = esc_for_title(track.title) end
 
 				items[#items + 1] = {
-					title = (track.title and track.title or lang._submenu_id_title .. track.id),
+					title = (track.title and track.title or t('Track %s', track.id)),
 					hint = table.concat(hint_values, ', '),
 					value = track.id,
 					active = track.selected,
@@ -150,9 +191,9 @@ function create_select_tracklist_type_menu_opener(menu_title, track_type, track_
 			mp.commandv('set', track_prop, value and value or 'no')
 
 			-- If subtitle track was selected, assume user also wants to see it
-			--if value and track_type == 'sub' then
-				--mp.commandv('set', 'sub-visibility', 'yes')
-			--end
+			if value and track_type == 'sub' then
+				mp.commandv('set', 'sub-visibility', 'yes')
+			end
 		end
 	end
 
@@ -198,10 +239,10 @@ function open_file_navigation_menu(directory_path, handle_select, opts)
 
 	if is_root then
 		if state.platform == 'windows' then
-			items[#items + 1] = {title = '..', hint = lang._submenu_file_browser_item_hint, value = '{drives}', separator = true}
+			items[#items + 1] = {title = '..', hint = t('Drives'), value = '{drives}', separator = true}
 		end
 	else
-		items[#items + 1] = {title = '..', hint = lang._submenu_file_browser_item_hint2, value = directory.dirname, separator = true}
+		items[#items + 1] = {title = '..', hint = t('parent dir'), value = directory.dirname, separator = true}
 	end
 
 	local back_path = items[#items] and items[#items].value
@@ -298,7 +339,7 @@ function open_drives_menu(handle_select, opts)
 			if drive then
 				local drive_path = normalize_path(drive)
 				items[#items + 1] = {
-					title = drive, hint = lang._submenu_file_browser_item2_hint, value = drive_path, active = opts.active_path == drive_path,
+					title = drive, hint = t('drive'), value = drive_path, active = opts.active_path == drive_path,
 				}
 				if opts.selected_path == drive_path then selected_index = #items end
 			end
@@ -308,7 +349,7 @@ function open_drives_menu(handle_select, opts)
 	end
 
 	return Menu:open(
-		{type = opts.type, title = opts.title or lang._submenu_file_browser_title, items = items, selected_index = selected_index},
+		{type = opts.type, title = opts.title or t('Drives'), items = items, selected_index = selected_index},
 		handle_select
 	)
 end
@@ -437,7 +478,7 @@ function open_stream_quality_menu()
 		items[#items + 1] = {title = height .. 'p', value = format, active = format == ytdl_format}
 	end
 
-	Menu:open({type = 'stream-quality', title = lang._stream_quality_submenu_title, items = items}, function(format)
+	Menu:open({type = 'stream-quality', title = t('Stream quality'), items = items}, function(format)
 		mp.set_property('ytdl-format', format)
 
 		-- Reload the video to apply new format
@@ -537,7 +578,7 @@ function create_track_loader_menu_opener(opts)
 		open_file_navigation_menu(
 			path,
 			function(path) mp.commandv(opts.prop .. '-add', path) end,
-			{type = menu_type, title = lang._import_id_menu .. opts.name, allowed_types = opts.allowed_types}
+			{type = menu_type, title = t('Load ' .. opts.name), allowed_types = opts.allowed_types}
 		)
 	end
 end

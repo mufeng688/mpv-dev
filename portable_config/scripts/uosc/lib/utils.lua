@@ -685,7 +685,11 @@ function normalize_chapters(chapters)
 	table.sort(chapters, function(a, b) return a.time < b.time end)
 	-- Ensure titles
 	for index, chapter in ipairs(chapters) do
-		chapter.title = chapter.title or (lang._chapter_list_submenu_item_title .. index)
+		local chapter_number = chapter.title and string.match(chapter.title, '^Chapter (%d+)$')
+		if chapter_number then
+			chapter.title = t('Chapter %s', tonumber(chapter_number))
+		end
+		chapter.title = chapter.title ~= '(unnamed)' and chapter.title ~= '' and chapter.title or t('Chapter %s', index)
 		chapter.lowercase_title = chapter.title:lower()
 	end
 	return chapters
@@ -734,7 +738,7 @@ function render()
 
 	-- Actual rendering
 	local ass = assdraw.ass_new()
---[[
+
 	-- Idle indicator
 	if state.is_idle and not Manager.disabled.idle_indicator then
 		local smaller_side = math.min(display.width, display.height)
@@ -742,11 +746,11 @@ function render()
 		ass:icon(center_x, center_y - icon_size / 4, icon_size, 'not_started', {
 			color = fg, opacity = config.opacity.idle_indicator,
 		})
-		ass:txt(center_x, center_y + icon_size / 2, 8, 'Drop files or URLs to play here', {
+		ass:txt(center_x, center_y + icon_size / 2, 8, t('Drop files or URLs to play here'), {
 			size = icon_size / 4, color = fg, opacity = config.opacity.idle_indicator,
 		})
 	end
-]]
+
 	-- Audio indicator
 	if state.is_audio and not state.has_image and not Manager.disabled.audio_indicator
 		and not (state.pause and options.pause_indicator == 'static') then

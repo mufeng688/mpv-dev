@@ -1,4 +1,4 @@
--- quality-menu 4.1.1 - 2023-Oct-22
+-- quality-menu 4.1.0 - 2023-Feb-17
 -- https://github.com/christoph-heinrich/mpv-quality-menu
 --
 -- Change the stream video and audio quality on the fly.
@@ -13,7 +13,6 @@ local utils = require 'mp.utils'
 local msg = require 'mp.msg'
 local assdraw = require 'mp.assdraw'
 local opt = require('mp.options')
-local script_name = mp.get_script_name()
 
 local opts = {
     --key bindings
@@ -932,7 +931,7 @@ local function uosc_menu_open(formats, active_format, menu_type)
         keep_open = true,
         on_close = {
             'script-message-to',
-            script_name,
+            'quality_menu',
             'uosc-menu-closed',
             menu_type.name,
         }
@@ -945,7 +944,7 @@ local function uosc_menu_open(formats, active_format, menu_type)
         hint = 'open menu',
         value = {
             'script-message-to',
-            script_name,
+            'quality_menu',
             menu_type.to_other_type.type .. '_formats_toggle',
         },
     }
@@ -957,7 +956,7 @@ local function uosc_menu_open(formats, active_format, menu_type)
         active = active_format == '',
         value = {
             'script-message-to',
-            script_name,
+            'quality_menu',
             menu_type.type .. '-format-set',
             current_url,
             '',
@@ -971,7 +970,7 @@ local function uosc_menu_open(formats, active_format, menu_type)
             active = format.id == active_format,
             value = {
                 'script-message-to',
-                script_name,
+                'quality_menu',
                 menu_type.type .. '-format-set',
                 current_url,
                 format.id,
@@ -1106,12 +1105,12 @@ local function loading_message(menu_type)
         if open_menu_state and open_menu_state == menu_type then return end
         local menu = {
             title = menu_type.type_capitalized .. ' Formats',
-            items = { { icon = 'spinner', selectable = false, value = 'ignore' } },
+            items = { { icon = 'spinner', value = 'ignore' } },
             type = 'quality-menu-' .. menu_type.name,
             keep_open = true,
             on_close = {
                 'script-message-to',
-                script_name,
+                'quality_menu',
                 'uosc-menu-closed',
                 menu_type.name
             }
@@ -1275,7 +1274,7 @@ mp.register_script_message('uosc-version', function(version)
         'uosc',
         'overwrite-binding',
         'stream-quality',
-        'script-binding ' .. script_name .. '/video_formats_toggle'
+        'script-binding quality_menu/video_formats_toggle'
     )
     ---@param name string
     mp.register_script_message('uosc-menu-closed', function(name)
