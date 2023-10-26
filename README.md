@@ -6,7 +6,7 @@ V0.5.1 beta:
 
 * 回滚调整cache目录
 * 更新mpv, ffmpeg, yt-dlp
-* 更新uosc
+* 更新uosc(MPV_lazy版本)
 * 同步mpv-config上的mpv.conf上的修改
 
 V0.5.0 beta:
