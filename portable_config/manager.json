@@ -54,10 +54,10 @@
     "branch":"dev"
   },
   {
-    "git":"https://github.com/6r14N/uosc",
-    "whitelist":"scripts",
+    "git":"https://github.com/dyphire/uosc",
+    "whitelist":"^scripts/.*$",
     "dest":"~~/scripts/uosc",
-    "branch":"main"
+    "branch":"dev"
   },
   {
     "git":"https://github.com/dyphire/autosubsync-mpv",
