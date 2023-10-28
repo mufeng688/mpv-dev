@@ -2,6 +2,8 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
+每一个季度同步一次上游
+
 V0.5.2 beta:
 
 * 更改为窗口顶置
