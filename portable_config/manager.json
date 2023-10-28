@@ -55,7 +55,7 @@
   },
   {
     "git":"https://github.com/dyphire/uosc",
-    "whitelist":"^scripts/.*$",
+    "whitelist":"dist/scripts",
     "dest":"~~/scripts/uosc",
     "branch":"dev"
   },
