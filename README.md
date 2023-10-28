@@ -1,4 +1,4 @@
-## 日志
+## 更新日志
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
