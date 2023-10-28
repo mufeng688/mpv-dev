@@ -8,6 +8,7 @@ V0.5.2 beta:
 * 更改为无边框模式
 * 回退上一版本的uosc更改，并把uosc.conf与[mpv-config](https://github.com/dyphire/mpv-config)同步，仅作控件调整
 * 修复manager.json中的uosc更新
+* 移除补帧滤镜及组件
 
 V0.5.1 beta:
 
