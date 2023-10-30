@@ -2,7 +2,11 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
-每一个季度同步一次上游，下一次更新为1.0版本
+每一个季度同步一次上游
+
+V1.0.0：
+
+* 同步MPV_lazy的thumbfast，已支持杜比视界预览，但是以十倍以上的性能代价支持杜比视界映射
 
 V0.5.2 beta:
 
