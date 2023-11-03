@@ -4,6 +4,15 @@
 
 每一个季度同步一次上游
 
+V1.0.1：
+
+* 新增.gitattributes&.gitignore
+* 更新usoc
+* 更新着色器
+* 更新一键更新脚本：添加readme及部分文件的选择
+* 更新mpv config设置
+* 更新mpv, ffmpeg
+
 V1.0.0：
 
 * 同步MPV_lazy的thumbfast，已支持杜比视界预览，但是以十倍以上的性能代价支持杜比视界映射
