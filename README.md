@@ -2,7 +2,7 @@
 
 本项目基于[mpv-config](https://github.com/dyphire/mpv-config) & [mpv](https://github.com/mpv-player/mpv)修改
 
-每一个季度同步一次上游
+随缘更新
 
 V1.0.1：
 
