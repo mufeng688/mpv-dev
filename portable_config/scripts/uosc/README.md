@@ -4,7 +4,7 @@
 		Feature-rich minimalist proximity-based UI for <a href="https://mpv.io">MPV player</a>.
 	</p>
 	<br/>
-	<a href="https://user-images.githubusercontent.com/47283320/195073006-bfa72bcc-89d2-4dc7-b8dc-f3c13273910c.webm"><img src="https://user-images.githubusercontent.com/47283320/195072935-44d591d9-00bb-4a55-8795-9cf81f65d397.png" alt="Preview screenshot"></a>
+	<a href="https://user-images.githubusercontent.com/47283320/195073006-bfa72bcc-89d2-4dc7-b8dc-f3c13273910c.webm"><img src="https://github.com/tomasklaen/uosc/assets/47283320/9f99f2ae-3b65-4935-8af3-8b80c605f022" alt="Preview screenshot"></a>
 </div>
 
 Features:
@@ -16,7 +16,7 @@ Features:
 -   Fast and efficient thumbnails with [thumbfast](https://github.com/po5/thumbfast) integration.
 -   UIs for:
     -   Selecting subtitle/audio/video track.
-    -   Downloading subtitles from Open Subtitles.
+    -   [Downloading subtitles](#download-subtitles) from [Open Subtitles](https://www.opensubtitles.com).
     -   Loading external subtitles.
     -   Selecting stream quality.
     -   Quick directory and playlist navigation.
@@ -223,11 +223,13 @@ For subtitles, the explorer only displays file types defined in `subtitle_types`
 
 A menu to search and download subtitles from [Open Subtitles](https://www.opensubtitles.com). It can also be opened by selecting the **Download** option in `subtitles` menu.
 
-We hash the current file and send the hash to Open Subtitles so you can search even with empty query and if your file is known, you'll get subtitles exactly for it.
+We fetch results for languages defined in *uosc**'s `languages` option, which defaults to your mpv `slang` configuration.
+
+We also hash the current file and send the hash to Open Subtitles so you can search even with empty query and if your file is known, you'll get subtitles exactly for it.
 
 Subtitles will be downloaded to the same directory as currently opened file, or `~~/subtitles` (folder in your mpv config directory) if playing a URL.
 
-Current Open Subtitles limit for unauthenticated requests is **5 download per day**, but searching is unlimited. Authentication raises downloads to 10, which doesn't feel like it's wroth the effort of implementing it, so currently there's no way to authenticate.
+Current Open Subtitles limit for unauthenticated requests is **5 download per day**, but searching is unlimited. Authentication raises downloads to 10, which doesn't feel like it's worth the effort of implementing it, so currently there's no way to authenticate. 5 downloads per day seems sufficient for most use cases anyway, as if you need more, you should probably just deal with it in the browser beforehand so you don't have to fiddle with the subtitle downloading menu every time you start playing a new file.
 
 #### `playlist`
 
@@ -484,6 +486,7 @@ Menu {
   keep_open?: boolean;
   on_close?: string | string[];
   on_search?: string | string[];
+  on_paste?: string | string[];
   search_style?: 'on_demand' | 'palette' | 'disabled'; // default: on_demand
   search_debounce?: 'submit' | number; // default: 0
   search_suggestion?: string;
@@ -503,6 +506,7 @@ Submenu {
   separator?: boolean;
   keep_open?: boolean;
   on_search?: string | string[];
+  on_paste?: string | string[];
   search_style?: 'on_demand' | 'palette' | 'disabled'; // default: on_demand
   search_debounce?: 'submit' | number; // default: 0
   search_suggestion?: string;
@@ -543,6 +547,8 @@ While the menu is open this value will be available in `user-data/uosc/menu/type
 
 `item.icon` property accepts icon names. You can pick one from here: [Google Material Icons](https://fonts.google.com/icons?icon.platform=web&icon.set=Material+Icons&icon.style=Rounded)\
 There is also a special icon name `spinner` which will display a rotating spinner. Along with a no-op command on an item and `keep_open=true`, this can be used to display placeholder menus/items that are still loading.
+
+`on_paste` is triggered when user pastes a string while menu is opened. Works the same as `on_search`.
 
 When `keep_open` is `true`, activating the item will not close the menu. This property can be defined on both menus and items, and is inherited from parent to child if child doesn't overwrite it.
 
@@ -732,6 +738,24 @@ This will parse the codebase for localization strings and use them to either upd
 
 You can then navigate to `src/uosc/intl/languagecode.json` and start translating.
 
-## Why _uosc_?
+## FAQ
+
+#### Why is the release zip size in megabytes? Isn't this just a lua script?
+
+We are limited in what we can do in mpv's lua scripting environment. To work around this, we include a binary tool (one for each platform), that we call to handle stuff we can't do in lua. Currently this means searching & downloading subtitles, accessing clipboard data, and in future might improve self updating, and potentially other things.
+
+Other scripts usually choose to go the route of adding python scripts and requiring users to install the runtime. I don't like this as I want the installation process to be as seamless and as painless as possible. I also don't want to contribute to potential python version mismatch issues, because one tool depends on 2.7, other latest 3, and this one 3.9 only and no newer (real world scenario that happened to me), now have fun reconciling this. Depending on external runtimes can be a mess, and shipping a stable, tiny, and fast binary that users don't even have to know about is imo more preferable than having unstable external dependencies and additional installation steps that force everyone to install and manage hundreds of megabytes big runtimes in global `PATH`.
+
+#### Why don't you have `uosc-{platform}.zip` releases and only include binaries for the concerned platform in each?
+
+Then you wouldn't be able to sync your mpv config between platforms and everything _just work_.
+
+#### Why is the release reported as malicious by some antiviruses?
+
+Some obscure antiviruses find our binaries suspicious due to the way go packages them. I think the only way to solve that would be to sign them (not 100% sure though), but I'm not paying to work on free stuff. If anyone is bothered by this, and would be willing to donate a code signing certificate, let me know.
+
+If you want to check the binaries are safe, the code is in `src/ziggy`, and you can build them yourself by running `tools/build ziggy` in the repository root and compare.
+
+#### Why _uosc_?
 
 It stood for micro osc as it used to render just a couple rectangles before it grew to what it is today. And now it means a minimalist UI design direction where everything is out of your way until needed.
